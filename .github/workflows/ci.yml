@@ -26,7 +26,7 @@ jobs:
 
       - name: Assert no sorryAx / native_decide in any axiom gate
         run: |
-          if grep -E "depends on axioms.*(sorryAx|ofReduceBool|ofNat)" build.log; then
+          if grep -E "depends on axioms.*(sorryAx|ofReduceBool|ofReduceNat)" build.log; then
             echo "::error::an axiom gate regressed (sorryAx or native_decide leaked into a gated declaration)"
             exit 1
           fi
