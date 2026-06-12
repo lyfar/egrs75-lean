@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build + kernel axiom audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Get Mathlib cache
+        run: lake exe cache get
+
+      - name: Build (gates print at build time)
+        run: lake build 2>&1 | tee build.log
+
+      - name: Assert no sorryAx / native_decide in any axiom gate
+        run: |
+          if grep -E "depends on axioms.*(sorryAx|ofReduceBool|ofNat)" build.log; then
+            echo "::error::an axiom gate regressed (sorryAx or native_decide leaked into a gated declaration)"
+            exit 1
+          fi
+          echo "All printed axiom gates are clean."
+
+      - name: Assert the headline gates are present and clean
+        run: |
+          for thm in egrs_two_prime_mu egrs_two_prime_finish egrs_two_prime_challenge_form; do
+            if ! grep -E "'.*${thm}' depends on axioms: \[propext, Classical.choice, Quot.sound\]" build.log; then
+              echo "::error::headline gate missing or unclean: ${thm}"
+              exit 1
+            fi
+          done
+          echo "Headline gates verified: egrs_two_prime_mu, egrs_two_prime_finish, challenge form."
+
+  comparator:
+    name: Comparator (adversarial statement/axiom/kernel check)
+    runs-on: ubuntu-latest
+    # Heavy job (builds lean4export + comparator + the workspace); run on demand.
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Install Go (for landrun)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install landrun (pinned; see leanprover/lean-eval SECURITY.md)
+        run: |
+          go install github.com/zouuup/landrun/cmd/landrun@5ed4a3db3a4ad930d577215c6b9abaa19df7f99f
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Build lean4export + comparator (toolchain-matched to this workspace)
+        run: |
+          git clone https://github.com/leanprover/lean4export.git /tmp/lean4export
+          ( cd /tmp/lean4export
+            cp "$GITHUB_WORKSPACE/lean-toolchain" lean-toolchain
+            lake build lean4export )
+          echo "/tmp/lean4export/.lake/build/bin" >> "$GITHUB_PATH"
+          git clone https://github.com/leanprover/comparator.git /tmp/comparator
+          ( cd /tmp/comparator
+            cp "$GITHUB_WORKSPACE/lean-toolchain" lean-toolchain
+            lake build comparator )
+          echo "/tmp/comparator/.lake/build/bin" >> "$GITHUB_PATH"
+
+      - name: Run comparator on the EGRS75 workspace
+        working-directory: comparator/egrs75
+        run: |
+          lake exe cache get || true
+          lake env comparator config.json

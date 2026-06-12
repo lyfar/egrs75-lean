@@ -1,0 +1,154 @@
+# formalization.yaml (v0.3) — self-report for the EGRS75 two-prime formalization.
+# Standard: https://github.com/mathlib-initiative/formalization.yaml
+#
+# SCOPE NOTE. This repository is the published dependency closure of the EGRS75
+# two-prime formalization, extracted verbatim from the author's working
+# repository (module names and content unchanged). A few SCAFFOLD declarations
+# from earlier proof routes carry a `sorry` (e.g. `egrs_crux` in EgrsDefs.lean,
+# the parked targets in EgrsCrux_Cdensity.lean / Equidist_mathlibapi.lean); all
+# are OUTSIDE the dependency cone of the main results below — the per-result
+# `#print axioms` gates establish the isolation at kernel level.
+
+version: "v0.3"
+
+project:
+  name: "EGRS75 two-prime theorem — a machine-checked proof (Construct project)"
+  authors: ["Egor Lyfar"]
+  license: "Apache-2.0"
+
+sources:
+  - title: "On the prime factors of (2n choose n)"
+    authors: ["P. Erdős", "R. L. Graham", "I. Z. Ruzsa", "E. G. Straus"]
+    id: "doi:10.1090/S0025-5718-1975-0369288-3 (Math. Comp. 29 (1975) 83–92)"
+    type: "journal article"
+    license: ""
+    author_contacted: "n/a"
+    prior_work: ""
+  - title: "Integers with small digits in multiple bases"
+    authors: ["T. F. Bloom", "E. Croot"]
+    id: "arXiv:2509.02835v1"
+    type: "preprint (context; defers the clearing step to the 1975 paper)"
+    license: ""
+    author_contacted: "no"
+    prior_work: ""
+
+status:
+  scope: >
+    Complete proof of the two-prime theorem (EGRS75 Theorem 1, equality case
+    A=(p-1)/2, B=(q-1)/2): for distinct odd primes p, q there are infinitely
+    many n with p ∤ C(2n,n) and q ∤ C(2n,n).  Includes the iterated
+    carry-controlled digit-clearing step that Bloom–Croot defer verbatim to the
+    1975 paper.  The general (A,B) Theorem 1 and all r ≥ 3 analogues
+    (Erdős #376/#406) are NOT formalized.
+  sorry_count: 0              # in the dependency cone of the main results (kernel-checked)
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+  - declaration: "ConstructProofs.Attack.Egrs.MuFinish.egrs_two_prime_mu"
+    file: "ConstructProofs/_attack/Egrs/EgrsMuFinish_20260612.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/egrs75/config.json"
+    literature_dependencies: []
+  - declaration: "ConstructProofs.Attack.Egrs.Finish.egrs_two_prime_finish"
+    file: "ConstructProofs/_attack/Egrs/EgrsFinish_core.lean"
+    sorry_count: 0
+    axioms: ["propext", "Classical.choice", "Quot.sound"]
+    comparator_config: "comparator/egrs75/config.json"
+    literature_dependencies: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-fable-5", "claude-opus-4-7 (earlier reduction phase)"]
+      framework: "Claude Code (agentic sessions inside the author's Construct project harness)"
+      tool_setup: >
+        Lean 4 / Mathlib v4.29.1 via lake; per-declaration `#print axioms` gates
+        in every file; iterative build-and-fix loops; recon-first doctrine
+        (canonical statement and state-of-the-art check filed before the attack).
+      cost:
+        wall_time: >
+          One agentic session (2026-06-12) for the closure (measure redesign,
+          Diophantine seed, single-move proof, assembly), on top of a multi-day
+          earlier phase (2026-06-07/08) that built the Kummer bridge, the
+          carry/digit primitives, and the reduction scaffolding.
+        spend_usd: "subscription-based usage"
+        hardware: "API-only; local MacBook for builds"
+      prompting_notes: >
+        The decisive human/agent design steps: replacing the bad-bit-mask measure
+        with the per-move lexicographic (working index, digit slack, value)
+        measure; the tight correction window making the staircase lemma apply;
+        the floor invariant on the digit block above the working index; reading
+        the original 1975 lemma from the paper scan to fix the window bound.
+  spend_usd: "subscription-based usage"
+  notes: >
+    All prose claims audited against kernel output; the repository's registry
+    doctrine forbids reporting any result the kernel does not certify.
+
+fidelity:
+  divergences: >
+    (1) Termination: the paper's per-move lemma (three-case conclusion, followed
+    by an informal "after a finite number of modifications") is replaced by an
+    explicit strictly-decreasing lexicographic measure ((working index)*q +
+    digit slack, value), certified by an elementary staircase lemma; the
+    mathematical moves themselves (subtract S=(p^m+1)/2; add a half-density
+    correction under condition (3)) follow the paper.  (2) The magnitude floor
+    is carried by the invariant N < floor(n/q^i)*q^i rather than by n itself.
+    (3) The starting points (paper condition (2)) are obtained from Dirichlet's
+    approximation theorem only — no equidistribution.  (4) Only the equality
+    case A=(p-1)/2, B=(q-1)/2 (the central-binomial corollary) is formalized.
+
+review:
+  status: "self-assessed"
+  reviewers: []
+  notes: >
+    Kernel-level audit: per-declaration `#print axioms` gates (all main results
+    print exactly [propext, Classical.choice, Quot.sound]); full-package build
+    (8,329 jobs, zero errors); no-vacuity smoke instantiations at (3,5), (3,7),
+    (5,7); a comparator workspace (comparator/egrs75/) restating the headline
+    theorem in Mathlib-only vocabulary.  No external human review yet.
+
+alignment:
+  namespace: "ConstructProofs.Attack.Egrs"
+  statements:
+    - source: "EGRS75 Theorem 1, two-prime case (p. 83)"
+      lean: "MuFinish.egrs_two_prime_mu  (independent second route: Finish.egrs_two_prime_finish)"
+      module: "ConstructProofs/_attack/Egrs/EgrsMuFinish_20260612.lean"
+      status: "proved"
+      note: "statement in Mathlib vocabulary; comparator challenge at comparator/egrs75/"
+    - source: "Kummer criterion (Fact (1), p. 83)"
+      lean: "not_dvd_centralBinom_iff_lowDigits"
+      module: "ConstructProofs/_attack/Egrs/EgrsDefs.lean"
+      status: "proved"
+      note: ""
+    - source: "repair Lemma (pp. 84–85), single move"
+      lean: "MuFinish.egrs_move"
+      module: "ConstructProofs/_attack/Egrs/EgrsMuFinish_20260612.lean"
+      status: "proved"
+      note: "termination via muVal_lt_of + MoveDigits.staircase instead of the paper's three-case conclusion"
+    - source: "condition (3) (p. 84)"
+      lean: "cond3_of_tail_small"
+      module: "ConstructProofs/_attack/Egrs/EgrsClearing_P4cond3window.lean"
+      status: "proved"
+      note: ""
+    - source: "density Fact (p. 85)"
+      lean: "RoundUp.exists_lowDigits_between"
+      module: "ConstructProofs/_attack/Egrs/EgrsRoundUp.lean"
+      status: "proved"
+      note: ""
+    - source: "condition (2) starting points (p. 84)"
+      lean: "SeedWindow.seed_window"
+      module: "ConstructProofs/_attack/Egrs/EgrsSeedWindow_20260612.lean"
+      status: "proved"
+      note: "via Dirichlet approximation + irrationality of log p / log q; no equidistribution"
+    - source: "Theorem 1, general (A,B) digit bounds"
+      lean: ""
+      module: ""
+      status: "not-formalized"
+      note: "only the equality case needed for the two-prime corollary is formalized"
+
+acknowledgements: >
+  Mathlib and its community (Dirichlet approximation, digits API, padic
+  valuations); the leanprover/comparator and mathlib-initiative/formalization.yaml
+  standards followed here; Bloom–Croot (arXiv:2509.02835) for pinpointing the
+  deferred step.

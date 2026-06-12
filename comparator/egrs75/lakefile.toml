@@ -1,0 +1,12 @@
+name = "egrs75comparator"
+version = "0.1.0"
+
+[[require]]
+name = "construct_proofs"
+path = "../.."
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
