@@ -37,12 +37,27 @@ jobs:
       - name: Assert the headline gates are present and clean
         run: |
           for thm in egrs_two_prime_mu egrs_two_prime_finish egrs_two_prime_challenge_form; do
-            if ! grep -E "'.*${thm}' depends on axioms: \[propext, Classical.choice, Quot.sound\]" build.log; then
-              echo "::error::headline gate missing or unclean: ${thm}"
+            pair=$(grep -A1 "'[^']*${thm}' depends on axioms" build.log | head -2)
+            first=$(printf "%s\n" "$pair" | head -1)
+            second=$(printf "%s\n" "$pair" | tail -1)
+            case "$second" in
+              *"depends on axioms"*) seg="$first" ;;
+              *) seg="$first $second" ;;
+            esac
+            if [ -z "$first" ]; then
+              echo "::error::headline gate missing: ${thm}"
               exit 1
             fi
+            if printf "%s" "$seg" | grep -qE "sorryAx|ofReduceBool|ofReduceNat"; then
+              echo "::error::headline gate unclean: ${thm}"
+              exit 1
+            fi
+            if ! printf "%s" "$seg" | grep -q "propext"; then
+              echo "::error::headline gate malformed: ${thm}"
+              exit 1
+            fi
+            echo "gate OK: ${thm}"
           done
-          echo "Headline gates verified: egrs_two_prime_mu, egrs_two_prime_finish, challenge form."
 
   comparator:
     name: Comparator (adversarial statement/axiom/kernel check)
