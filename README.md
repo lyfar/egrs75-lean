@@ -18,7 +18,7 @@ Two-Prime Theorem* (draft, 2026).
 | Theorem | File |
 |---|---|
 | `ConstructProofs.Attack.Egrs.MuFinish.egrs_two_prime_mu` | `ConstructProofs/_attack/Egrs/EgrsMuFinish_20260612.lean` |
-| `ConstructProofs.Attack.Egrs.Finish.egrs_two_prime_finish` (independent second route) | `ConstructProofs/_attack/Egrs/EgrsFinish_core.lean` |
+| `ConstructProofs.Attack.Egrs.Finish.egrs_two_prime_finish` (bad-bit-mask assembly; low case from `MuFinish`) | `ConstructProofs/_attack/Egrs/EgrsFinish_core.lean` |
 
 Both print exactly
 
@@ -29,6 +29,10 @@ Both print exactly
 under `#print axioms` — **no `sorryAx`, no `native_decide`, no extra axioms.**
 Every public lemma in the development ends with a `#print axioms` gate, so the
 audit re-runs on every build.
+
+The two final theorems are not independent proofs: `Finish` imports `MuFinish`
+and uses `MuFinish.egrs_clearing_low_mu` to discharge its low case. They do use
+different outer assemblies, but share the decisive μ-based clearing result.
 
 ## Verifying the claim
 
