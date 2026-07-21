@@ -1,5 +1,20 @@
 # EGRS75 two-prime theorem — a machine-checked proof in Lean 4
 
+## MISHA mission
+
+My son Misha has a rare genetic hearing loss. I am building an independent AI
+research lab for rare diseases. Every result that survives formal checking and
+outside review is one step toward that lab—and toward tools that may help
+millions of people.
+
+One rare disease is rare. Rare diseases together are not.
+
+This theorem has no claimed biomedical application. Its role is to test the
+research pipeline: can AI-assisted work recover a hard proof from the
+literature, formalize it, expose dependency mistakes, and survive kernel and
+outside review? A lab we can trust in biology first needs a workflow we can
+trust in mathematics.
+
 [Erdős–Graham–Ruzsa–Straus (Math. Comp. **29** (1975) 83–92), Theorem 1, two-prime case]:
 for any two distinct odd primes `p, q` there are infinitely many `n` with
 
