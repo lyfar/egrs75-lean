@@ -42,8 +42,9 @@ Both print exactly
 ```
 
 under `#print axioms` — **no `sorryAx`, no `native_decide`, no extra axioms.**
-Every public lemma in the development ends with a `#print axioms` gate, so the
-audit re-runs on every build.
+Selected load-bearing lemmas and both headline theorems have explicit
+`#print axioms` gates. CI requires the headline gates and re-runs them on every
+build.
 
 The two final theorems are not independent proofs: `Finish` imports `MuFinish`
 and uses `MuFinish.egrs_clearing_low_mu` to discharge its low case. They do use

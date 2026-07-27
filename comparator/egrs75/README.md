@@ -40,8 +40,8 @@ systemd-run --property=RestrictAddressFamilies=~AF_UNIX --user --pty \
 ## What is already verified locally (macOS, this repository)
 
 - The development builds with **zero errors** (full package, 8,329 jobs).
-- `#print axioms` on `egrs_two_prime_mu` (and the independent route
-  `egrs_two_prime_finish`) prints exactly
+- `#print axioms` on `egrs_two_prime_mu` (and the second outer assembly
+  `egrs_two_prime_finish`, which reuses the μ-based low-case result) prints exactly
   `[propext, Classical.choice, Quot.sound]` — no `sorryAx`, no `native_decide`.
 - The challenge statement is provable by the development **verbatim**:
   `SmokeProbe.egrs_two_prime_challenge_form`

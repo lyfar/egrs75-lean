@@ -112,7 +112,7 @@ alignment:
   namespace: "ConstructProofs.Attack.Egrs"
   statements:
     - source: "EGRS75 Theorem 1, two-prime case (p. 83)"
-      lean: "MuFinish.egrs_two_prime_mu  (independent second route: Finish.egrs_two_prime_finish)"
+      lean: "MuFinish.egrs_two_prime_mu  (second outer assembly: Finish.egrs_two_prime_finish, reusing MuFinish.egrs_clearing_low_mu)"
       module: "ConstructProofs/_attack/Egrs/EgrsMuFinish_20260612.lean"
       status: "proved"
       note: "statement in Mathlib vocabulary; comparator challenge at comparator/egrs75/"
